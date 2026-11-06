@@ -1,0 +1,43 @@
+/* Generated from tokens.json (blaetter-design), do not edit. Dark values: follows the system unless data-theme="light" is set; data-theme="dark" forces them. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --blaetter-color-page: #161616;
+    --blaetter-color-text: #e8e8e8;
+    --blaetter-color-red: #ec465d;
+    --blaetter-color-link: #5db4e3;
+    --blaetter-color-focus: #5db4e3;
+    --blaetter-color-muted: #a3a3a3;
+    --blaetter-color-boundary: #808080;
+    --blaetter-color-rule-strong: #4a4a4a;
+    --blaetter-color-rule: #333333;
+    --blaetter-color-surface: #262626;
+    --blaetter-color-marker: #403500;
+    --blaetter-cover-petrol: #339393;
+    --blaetter-cover-blue: #3386b3;
+    --blaetter-cover-violet: #b35393;
+    --blaetter-cover-green: #80a659;
+    --blaetter-cover-red: #cd3966;
+    --blaetter-cover-ochre: #c69333;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --blaetter-color-page: #161616;
+  --blaetter-color-text: #e8e8e8;
+  --blaetter-color-red: #ec465d;
+  --blaetter-color-link: #5db4e3;
+  --blaetter-color-focus: #5db4e3;
+  --blaetter-color-muted: #a3a3a3;
+  --blaetter-color-boundary: #808080;
+  --blaetter-color-rule-strong: #4a4a4a;
+  --blaetter-color-rule: #333333;
+  --blaetter-color-surface: #262626;
+  --blaetter-color-marker: #403500;
+  --blaetter-cover-petrol: #339393;
+  --blaetter-cover-blue: #3386b3;
+  --blaetter-cover-violet: #b35393;
+  --blaetter-cover-green: #80a659;
+  --blaetter-cover-red: #cd3966;
+  --blaetter-cover-ochre: #c69333;
+  color-scheme: dark;
+}

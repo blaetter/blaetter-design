@@ -1,0 +1,6 @@
+#!/bin/sh
+# Runs bin/tokens.php in Docker, so nothing besides Docker is needed.
+# Usage: ./design build | ./design check
+set -eu
+cd "$(dirname "$0")"
+exec docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/app -w /app php:8.4-cli-alpine php bin/tokens.php "$@"
