@@ -27,6 +27,19 @@
 | dunkel | focus (border) | `#5DB4E3` | page | `#161616` | 7.84:1 | 3:1 | ok |
 | hell | boundary (border) | `#808080` | page | `#FFFFFF` | 3.94:1 | 3:1 | ok |
 | dunkel | boundary (border) | `#808080` | page | `#161616` | 4.58:1 | 3:1 | ok |
+| hell | page | `#FFFFFF` | red | `#E51736` | 4.65:1 | 4.5:1 | ok |
+| dunkel | page | `#FFFFFF` | red | `#E51736` | 4.65:1 | 4.5:1 | ok |
+| hell | page | `#FFFFFF` | red-dark | `#C8102E` | 5.88:1 | 4.5:1 | ok |
+| hell | page | `#FFFFFF` | link | `#086D9A` | 5.73:1 | 4.5:1 | ok |
+| dunkel | page | `#FFFFFF` | link | `#086D9A` | 5.73:1 | 4.5:1 | ok |
+| hell | page | `#FFFFFF` | link-hover | `#097EB2` | 4.52:1 | 4.5:1 | ok |
+| hell | link-on-dark | `#5DB4E3` | text | `#000000` | 9.10:1 | 4.5:1 | ok |
+| hell | success | `#008000` | page | `#FFFFFF` | 5.13:1 | 4.5:1 | ok |
+| hell | success (border) | `#008000` | surface | `#F2F2F2` | 4.58:1 | 3:1 | ok |
+| hell | warning | `#A35A00` | page | `#FFFFFF` | 5.22:1 | 4.5:1 | ok |
+| hell | warning (border) | `#A35A00` | surface | `#F2F2F2` | 4.66:1 | 3:1 | ok |
+| hell | red (border) | `#E51736` | surface | `#F2F2F2` | 4.16:1 | 3:1 | ok |
+| dunkel | red (border) | `#E51736` | surface | `#262626` | 3.24:1 | 3:1 | ok |
 | hell | cover.petrol | `#007878` | page | `#FFFFFF` | 5.30:1 | 3:1 | ok |
 | dunkel | cover.petrol | `#339393` | page | `#161616` | 4.94:1 | 3:1 | ok |
 | hell | cover.blue | `#0068A0` | page | `#FFFFFF` | 6.02:1 | 3:1 | ok |
