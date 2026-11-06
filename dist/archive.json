@@ -16,7 +16,8 @@
         "rule": "#E3E3E3",
         "surface": "#F2F2F2",
         "marker": "#FFE9A0",
-        "success": "#008000"
+        "success": "#008000",
+        "warning": "#A35A00"
     },
     "darkMap": {
         "FFFFFF": [

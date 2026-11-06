@@ -38,6 +38,20 @@ PHP 8.2 or later, `php bin/tokens.php build` works as well. Commit
 `tokens.json` and `dist/` together; the GitHub Action runs `check` on every
 push.
 
+## Grounds: the website differs
+
+The archive and the status page lie on white (`page`); grey (`surface`)
+marks a tile, a notice or a hover row on it. The website (Palm,
+blaetter-theme) still lies on grey: its page wrapper is `surface`
+(`$page-background-color` in blaetter-theme). An element that is grey on white elsewhere
+would vanish there, so on the website it turns around: white with a frame.
+Example: the notice of the archive is grey with a rule at the left; Drupal's
+status messages on the website are white, framed in the colour of their
+kind, with the broad rule at the left (`css/messages.css` in Palm).
+Contrast pairs on `surface` therefore stay in `tokens.json` even where the
+website shows the element on white. Moving the website onto white is a
+later, larger step.
+
 ## tokens.json
 
 **colors**: one entry per role (`page`, `text`, `link`, `muted`, …):

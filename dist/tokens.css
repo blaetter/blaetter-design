@@ -16,6 +16,7 @@
   --blaetter-color-surface: #f2f2f2;
   --blaetter-color-marker: #ffe9a0;
   --blaetter-color-success: #008000;
+  --blaetter-color-warning: #a35a00;
   --blaetter-cover-petrol: #007878;
   --blaetter-cover-blue: #0068a0;
   --blaetter-cover-violet: #a02878;
@@ -43,4 +44,5 @@
   --palm-color-grey-dark: var(--blaetter-color-rule);
   --palm-color-grey: var(--blaetter-color-surface);
   --palm-color-success: var(--blaetter-color-success);
+  --palm-color-warning: var(--blaetter-color-warning);
 }
