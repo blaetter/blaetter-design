@@ -9,6 +9,8 @@ declare(strict_types=1);
  *   tokens.css       light values as custom properties (--blaetter-*), plus
  *                    the --palm-color-* names the website theme uses
  *   tokens-dark.css  dark values of the same properties, for pages with a dark theme
+ *   tokens.scss      light values as Sass variables ($blaetter-*), for the Sass
+ *                    build of the website's legacy styles (blaetter-theme)
  *   archive.json     plain hex values and the light → dark map of the offline archive
  *   contrast.md      every checked pair with its contrast, for review
  *
@@ -34,6 +36,7 @@ try {
     $files = [
         'tokens.css' => tokensCss($model),
         'tokens-dark.css' => tokensDarkCss($model),
+        'tokens.scss' => tokensScss($model),
         'archive.json' => archiveJson($model),
         'contrast.md' => contrastMd($model),
     ];
@@ -256,8 +259,7 @@ function tokensCss(array $model): string
     }
     $lines[] = '';
     foreach ($model['fonts'] as $name => $f) {
-        $stack = array_map(static fn (string $s): string => in_array($s, ['serif', 'sans-serif', 'monospace'], true) ? $s : '"' . $s . '"', $f['stack']);
-        $lines[] = sprintf('  --blaetter-font-%s: %s;', $name, implode(', ', $stack));
+        $lines[] = sprintf('  --blaetter-font-%s: %s;', $name, fontStack($f['stack']));
     }
     $lines[] = '';
     $lines[] = '  /* Names of the website theme (palm) */';
@@ -268,6 +270,26 @@ function tokensCss(array $model): string
     }
 
     return banner('Light values.') . ":root {\n" . implode("\n", $lines) . "\n}\n";
+}
+
+function tokensScss(array $model): string
+{
+    $lines = [];
+    foreach ($model['colors'] as $name => $c) {
+        $lines[] = sprintf('%s: %s;', '$' . substr(property($name), 2), strtolower($c['light']));
+    }
+    $lines[] = '';
+    foreach ($model['fonts'] as $name => $f) {
+        $lines[] = sprintf('$blaetter-font-%s: %s;', $name, fontStack($f['stack']));
+    }
+
+    return "// Generated from tokens.json (blaetter-design), do not edit. Light values as Sass variables.\n" . implode("\n", $lines) . "\n";
+}
+
+/** @param list<string> $stack */
+function fontStack(array $stack): string
+{
+    return implode(', ', array_map(static fn (string $s): string => in_array($s, ['serif', 'sans-serif', 'monospace'], true) ? $s : '"' . $s . '"', $stack));
 }
 
 function tokensDarkCss(array $model): string

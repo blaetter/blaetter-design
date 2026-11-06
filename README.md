@@ -8,7 +8,7 @@ against it:
 | Consumer | Copy | Checked by |
 |---|---|---|
 | Website theme (Palm) | `css/blaetter-tokens.css` = `dist/tokens.css` (`--palm-color-*` names); the theme's `css/tokens.css` adds semantic tokens and must not redefine the base colours | `make tokens-check` in the theme (`make tokens` copies) |
-| Website styleguide (blaetter-theme) | none: the Sass variables in `source-bundle/scss/00-global/01-settings.scss` repeat the light values for `bundle/palm.css` | by hand; change them together with `tokens.json` |
+| Website styleguide (blaetter-theme) | `source-bundle/scss/00-global/00-blaetter-tokens.scss` = `dist/tokens.scss`; `01-settings.scss` only points its Sass variables to it | `make colors-check` in the theme: every colour of the built `palm.css` is a token or on its short list of exceptions |
 | Offline archive (blaetter-archiv) | `config/design-tokens.json` = `dist/archive.json`: hex values for `archiv.css`, the light → dark map for `archiv-dark.css`, the cover hues | `DesignTokensTest` in the archive |
 | Status page (blaetter/status) | `assets/css/tokens.css`, `assets/css/tokens-dark.css` | `tests/design-tokens.sh`, run by its workflow *Publish page* against this repository |
 
@@ -28,7 +28,7 @@ this repository at run time.
 ```
 
 `copies` looks for the consumers next to this repository (`../blaetter-archiv`,
-`../status.blaetter.de`, the theme inside `../blaetter.web`; see
+`../status.blaetter.de`, `../blaetter-theme`, the theme inside `../blaetter.web`; see
 `bin/copies.sh`), skips those not checked out and runs on the host. After a
 change: `./design build`, `./design copies --update`, then commit in every
 consumer.
@@ -58,8 +58,10 @@ push.
 Tokens that share a light value must agree on their dark values, because
 the archive maps colours by value.
 
-**cover**: the hues of the covers of the current year. Their dark values
-are not set by hand: mixed with 20 % white, as the archive shows them on
+**cover**: the hues of the covers since the print layout of 2026; the
+palette stays the same over the years, the issues rotate through it. The
+values are assumptions until the designer's sRGB values for the Pantone U
+colours are in. Their dark values are not set by hand: mixed with 20 % white, as the archive shows them on
 dark pages.
 
 **fonts**: font stacks, written as `--blaetter-font-<name>`.
@@ -75,6 +77,9 @@ borders of fields). The result of every pair is listed in
 - `dist/tokens.css`: light values as `--blaetter-color-*`,
   `--blaetter-cover-*`, `--blaetter-font-*`, plus the `--palm-color-*`
   names of the website theme pointing to them.
+- `dist/tokens.scss`: light values and font stacks as Sass variables
+  (`$blaetter-color-*`, `$blaetter-cover-*`, `$blaetter-font-*`) for the Sass
+  build of blaetter-theme.
 - `dist/tokens-dark.css`: dark values of the same properties. They apply
   when the system is dark and the page has no `data-theme="light"`, or
   when it has `data-theme="dark"`. Pages without a dark theme do not load it.

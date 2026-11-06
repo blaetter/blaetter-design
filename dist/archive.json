@@ -5,16 +5,18 @@
         "text": "#000000",
         "red": "#E51736",
         "red-light": "#EC465D",
-        "red-pale": "#FAD1D7",
+        "red-dark": "#C8102E",
         "link": "#086D9A",
         "link-hover": "#097EB2",
+        "link-on-dark": "#5DB4E3",
         "focus": "#086D9A",
         "muted": "#6B6B6B",
         "boundary": "#808080",
         "rule-strong": "#CCCCCC",
         "rule": "#E3E3E3",
         "surface": "#F2F2F2",
-        "marker": "#FFE9A0"
+        "marker": "#FFE9A0",
+        "success": "#008000"
     },
     "darkMap": {
         "FFFFFF": [

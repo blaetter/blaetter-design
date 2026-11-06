@@ -30,5 +30,6 @@ archive.json    blaetter-archiv/config/design-tokens.json
 tokens.css      status.blaetter.de/assets/css/tokens.css
 tokens-dark.css status.blaetter.de/assets/css/tokens-dark.css
 tokens.css      blaetter.web/web/themes/contrib/palm/css/blaetter-tokens.css
+tokens.scss     blaetter-theme/source-bundle/scss/00-global/00-blaetter-tokens.scss
 EOF
 exit $status
