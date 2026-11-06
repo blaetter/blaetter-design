@@ -5,11 +5,12 @@ hues of the covers and the font stacks. `tokens.json` is the only place
 where they are defined; everything else is generated from it or checked
 against it:
 
-| Consumer | Uses | Checked by |
+| Consumer | Copy | Checked by |
 |---|---|---|
-| Website theme (palm) | `dist/tokens.css` (`--palm-color-*` names) | a test in the theme comparing its copy with this repository |
-| Offline archive (blaetter-archiv) | `dist/archive.json`: hex values for `archiv.css`, the light → dark map for `archiv-dark.css`, the cover hues | a test in the archive |
-| Status page (blaetter/status) | `dist/tokens.css`, `dist/tokens-dark.css` | its GitHub Action |
+| Website theme (Palm) | `css/blaetter-tokens.css` = `dist/tokens.css` (`--palm-color-*` names); the theme's `css/tokens.css` adds semantic tokens and must not redefine the base colours | `make tokens-check` in the theme (`make tokens` copies) |
+| Website styleguide (blaetter-theme) | none: the Sass variables in `source-bundle/scss/00-global/01-settings.scss` repeat the light values for `bundle/palm.css` | by hand; change them together with `tokens.json` |
+| Offline archive (blaetter-archiv) | `config/design-tokens.json` = `dist/archive.json`: hex values for `archiv.css`, the light → dark map for `archiv-dark.css`, the cover hues | `DesignTokensTest` in the archive |
+| Status page (blaetter/status) | `assets/css/tokens.css`, `assets/css/tokens-dark.css` | `tests/design-tokens.sh`, run by its workflow *Publish page* against this repository |
 
 The consumers keep a copy of the files they use, so none of them depends on
 this repository at run time.
@@ -21,7 +22,18 @@ this repository at run time.
 ./design check   # exit 1 when dist/ is out of date or a contrast pair fails
 ```
 
-Both run `bin/tokens.php` in Docker (`php:8.4-cli-alpine`); with a local
+```sh
+./design copies            # compare the consumers' copies with dist/
+./design copies --update   # copy dist/ to the consumers
+```
+
+`copies` looks for the consumers next to this repository (`../blaetter-archiv`,
+`../status.blaetter.de`, the theme inside `../blaetter.web`; see
+`bin/copies.sh`), skips those not checked out and runs on the host. After a
+change: `./design build`, `./design copies --update`, then commit in every
+consumer.
+
+`build` and `check` run `bin/tokens.php` in Docker (`php:8.4-cli-alpine`); with a local
 PHP 8.2 or later, `php bin/tokens.php build` works as well. Commit
 `tokens.json` and `dist/` together; the GitHub Action runs `check` on every
 push.
