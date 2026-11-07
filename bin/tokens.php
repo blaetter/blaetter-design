@@ -7,11 +7,13 @@ declare(strict_types=1);
  * themes) and writes the files in dist/:
  *
  *   tokens.css       light values as custom properties (--blaetter-*), plus
- *                    the --palm-color-* names the website theme uses
+ *                    the --palm-color-* names the website theme uses; the
+ *                    breakpoints as values and media queries (for scripts)
  *   tokens-dark.css  dark values of the same properties, for pages with a dark theme
- *   tokens.scss      light values as Sass variables ($blaetter-*), for the Sass
- *                    build of the website's legacy styles (blaetter-theme)
- *   archive.json     plain hex values and the light → dark map of the offline archive
+ *   tokens.scss      light values and breakpoints as Sass variables ($blaetter-*),
+ *                    for the Sass build of the website's legacy styles (blaetter-theme)
+ *   archive.json     plain hex values, the light → dark map and the media queries
+ *                    of the offline archive
  *   contrast.md      every checked pair with its contrast, for review
  *
  * Usage: php bin/tokens.php build   write dist/
@@ -133,7 +135,63 @@ function model(array $tokens): array
         $byHex[$c['light']] = $name;
     }
 
-    return ['colors' => $colors, 'fonts' => $fonts, 'pairs' => $pairs];
+    $breakpoints = [];
+    foreach ($tokens['breakpoints'] ?? [] as $name => $b) {
+        if (str_starts_with($name, '$')) {
+            continue;
+        }
+        $breakpoints[$name] = breakpoint($name, $b);
+    }
+
+    return ['colors' => $colors, 'fonts' => $fonts, 'pairs' => $pairs, 'breakpoints' => $breakpoints];
+}
+
+/**
+ * A breakpoint is either the upper end of a step ("max", e.g. phones up to 720 px)
+ * or the lower end ("min"), in whole px.
+ *
+ * @return array{px: int, edge: string, use: string}
+ */
+function breakpoint(string $name, array $b): array
+{
+    if (!preg_match('/^[a-z][a-z-]*$/', $name)) {
+        throw new RuntimeException("breakpoints.$name: name in lower case letters and hyphens");
+    }
+    $unknown = array_diff(array_keys($b), ['min', 'max', 'use']);
+    if ($unknown !== []) {
+        throw new RuntimeException("breakpoints.$name: unknown key " . implode(', ', $unknown));
+    }
+    $edges = array_values(array_intersect(['min', 'max'], array_keys($b)));
+    if (count($edges) !== 1 || !is_int($b[$edges[0]]) || $b[$edges[0]] <= 0) {
+        throw new RuntimeException("breakpoints.$name: exactly one of \"min\" or \"max\", a width in whole px");
+    }
+
+    return ['px' => $b[$edges[0]], 'edge' => $edges[0], 'use' => (string) ($b['use'] ?? '')];
+}
+
+function rem(float $px): string
+{
+    return rtrim(rtrim(sprintf('%.3f', $px / 16), '0'), '.') . 'rem';
+}
+
+/**
+ * Media queries per name: "<name>" for the step itself, plus "above-<name>" for the
+ * screens above a "max" step (its width + 0.001rem, as the website's legacy styles
+ * write it, so the two never overlap).
+ *
+ * @return array<string, string>
+ */
+function mediaQueries(array $model): array
+{
+    $out = [];
+    foreach ($model['breakpoints'] as $name => $b) {
+        $out[$name] = sprintf('(%s-width: %s)', $b['edge'], rem($b['px']));
+        if ($b['edge'] === 'max') {
+            $out["above-$name"] = sprintf('(min-width: %s)', rtrim(rtrim(sprintf('%.3f', $b['px'] / 16 + 0.001), '0'), '.') . 'rem');
+        }
+    }
+
+    return $out;
 }
 
 /** @return array{light: string, dark: ?array<string, string>, palm: ?string, use: string, note: string} */
@@ -262,6 +320,14 @@ function tokensCss(array $model): string
         $lines[] = sprintf('  --blaetter-font-%s: %s;', $name, fontStack($f['stack']));
     }
     $lines[] = '';
+    $lines[] = '  /* Breakpoints: media queries cannot read these, CSS writes the queries out; for scripts (matchMedia). */';
+    foreach ($model['breakpoints'] as $name => $b) {
+        $lines[] = sprintf('  --blaetter-breakpoint-%s: %s;', $name, rem($b['px']));
+    }
+    foreach (mediaQueries($model) as $name => $query) {
+        $lines[] = sprintf('  --blaetter-media-%s: %s;', $name, $query);
+    }
+    $lines[] = '';
     $lines[] = '  /* Names of the website theme (palm) */';
     foreach ($model['colors'] as $name => $c) {
         if ($c['palm'] !== null) {
@@ -282,8 +348,15 @@ function tokensScss(array $model): string
     foreach ($model['fonts'] as $name => $f) {
         $lines[] = sprintf('$blaetter-font-%s: %s;', $name, fontStack($f['stack']));
     }
+    $lines[] = '';
+    foreach ($model['breakpoints'] as $name => $b) {
+        $lines[] = sprintf('$blaetter-breakpoint-%s: %s;', $name, rem($b['px']));
+    }
+    foreach (mediaQueries($model) as $name => $query) {
+        $lines[] = sprintf('$blaetter-media-%s: "%s";', $name, $query);
+    }
 
-    return "// Generated from tokens.json (blaetter-design), do not edit. Light values as Sass variables.\n" . implode("\n", $lines) . "\n";
+    return "// Generated from tokens.json (blaetter-design), do not edit. Light values and breakpoints as Sass variables.\n" . implode("\n", $lines) . "\n";
 }
 
 /** @param list<string> $stack */
@@ -325,7 +398,7 @@ function archiveJson(array $model): string
         }
     }
 
-    return json_encode(['$comment' => 'Generated from tokens.json (blaetter-design), do not edit.', 'colors' => $colors, 'darkMap' => $map, 'cover' => $cover], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
+    return json_encode(['$comment' => 'Generated from tokens.json (blaetter-design), do not edit.', 'colors' => $colors, 'darkMap' => $map, 'cover' => $cover, 'media' => mediaQueries($model)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
 }
 
 function contrastMd(array $model): string

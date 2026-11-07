@@ -96,5 +96,11 @@
             "light": "#B87800",
             "dark": "#C69333"
         }
+    },
+    "media": {
+        "phone": "(max-width: 45rem)",
+        "above-phone": "(min-width: 45.001rem)",
+        "desktop": "(min-width: 75rem)",
+        "wide": "(min-width: 88.75rem)"
     }
 }

@@ -1,7 +1,7 @@
 # blaetter-design
 
 The design tokens of the »Blätter« layouts: colours (light and dark), the
-hues of the covers and the font stacks. `tokens.json` is the only place
+hues of the covers, the font stacks and the breakpoints. `tokens.json` is the only place
 where they are defined; everything else is generated from it or checked
 against it:
 
@@ -52,6 +52,27 @@ Contrast pairs on `surface` therefore stay in `tokens.json` even where the
 website shows the element on white. Moving the website onto white is a
 later, larger step.
 
+## Breakpoints
+
+Three steps for all layouts, taken from the website (its legacy styles set
+them, rebuilding those would be expensive; 720 px lies close to the 768 px
+many frameworks use):
+
+| Name | Media query | Width | For |
+|---|---|---|---|
+| `phone` | `(max-width: 45rem)` | up to 720 px | phones: one column, compact elements |
+| `above-phone` | `(min-width: 45.001rem)` | from 720 px | everything that is not a phone |
+| `desktop` | `(min-width: 75rem)` | from 1200 px | laptops and larger screens |
+| `wide` | `(min-width: 88.75rem)` | from 1420 px | the website's page width: side columns |
+
+Media queries cannot read custom properties, so CSS writes these queries out
+literally; the consumers check that no other width appears in their own
+styles. The generated values (`--blaetter-media-*`, `$blaetter-media-*`,
+`media` in `archive.json`) document them and serve scripts:
+`matchMedia(getComputedStyle(document.documentElement).getPropertyValue('--blaetter-media-wide'))`.
+The website's legacy styles keep their finer steps (420, 560 and 1000 px)
+until the parts are replaced; new components use only these three.
+
 ## tokens.json
 
 **colors**: one entry per role (`page`, `text`, `link`, `muted`, …):
@@ -80,6 +101,11 @@ dark pages.
 
 **fonts**: font stacks, written as `--blaetter-font-<name>`.
 
+**breakpoints**: one entry per step with exactly one of `max` (the upper
+end of a step, e.g. phones) or `min` (the lower end), a width in whole px,
+and `use`. A `max` step also yields `above-<name>` (its width + 0.001rem, as
+the website's legacy styles write it, so the two never overlap).
+
 **contrast.pairs**: foreground and background that must reach `min` (WCAG 2
 contrast ratio) in both themes; `cover.*` stands for all cover hues. The
 foreground counts as text unless `"as": "border"` is given (focus outlines,
@@ -89,15 +115,17 @@ borders of fields). The result of every pair is listed in
 ## Generated files
 
 - `dist/tokens.css`: light values as `--blaetter-color-*`,
-  `--blaetter-cover-*`, `--blaetter-font-*`, plus the `--palm-color-*`
-  names of the website theme pointing to them.
-- `dist/tokens.scss`: light values and font stacks as Sass variables
-  (`$blaetter-color-*`, `$blaetter-cover-*`, `$blaetter-font-*`) for the Sass
+  `--blaetter-cover-*`, `--blaetter-font-*`, the breakpoints as
+  `--blaetter-breakpoint-*` (width) and `--blaetter-media-*` (media query),
+  plus the `--palm-color-*` names of the website theme pointing to them.
+- `dist/tokens.scss`: light values, font stacks and breakpoints as Sass
+  variables (`$blaetter-color-*`, `$blaetter-cover-*`, `$blaetter-font-*`,
+  `$blaetter-breakpoint-*`, `$blaetter-media-*` as strings) for the Sass
   build of blaetter-theme.
 - `dist/tokens-dark.css`: dark values of the same properties. They apply
   when the system is dark and the page has no `data-theme="light"`, or
   when it has `data-theme="dark"`. Pages without a dark theme do not load it.
 - `dist/archive.json`: `colors` (light hex per role), `darkMap` (light hex
-  → dark hex as text, background, border; `null` keeps the colour) and
-  `cover` (light and dark hue).
+  → dark hex as text, background, border; `null` keeps the colour), `cover`
+  (light and dark hue) and `media` (media query per breakpoint).
 - `dist/contrast.md`: every checked pair with its ratio.

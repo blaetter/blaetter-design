@@ -1,4 +1,4 @@
-// Generated from tokens.json (blaetter-design), do not edit. Light values as Sass variables.
+// Generated from tokens.json (blaetter-design), do not edit. Light values and breakpoints as Sass variables.
 $blaetter-color-page: #ffffff;
 $blaetter-color-text: #000000;
 $blaetter-color-red: #e51736;
@@ -26,3 +26,11 @@ $blaetter-cover-ochre: #b87800;
 $blaetter-font-serif: "droid-serif", "Georgia", "Times New Roman", serif;
 $blaetter-font-sans: "droid-sans", "Arial", sans-serif;
 $blaetter-font-display: "playfair", "Georgia", serif;
+
+$blaetter-breakpoint-phone: 45rem;
+$blaetter-breakpoint-desktop: 75rem;
+$blaetter-breakpoint-wide: 88.75rem;
+$blaetter-media-phone: "(max-width: 45rem)";
+$blaetter-media-above-phone: "(min-width: 45.001rem)";
+$blaetter-media-desktop: "(min-width: 75rem)";
+$blaetter-media-wide: "(min-width: 88.75rem)";
