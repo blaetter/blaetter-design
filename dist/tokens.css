@@ -28,6 +28,16 @@
   --blaetter-font-sans: "droid-sans", "Arial", sans-serif;
   --blaetter-font-display: "playfair", "Georgia", serif;
 
+  --blaetter-space-2xs: 0.25rem;
+  --blaetter-space-xs: 0.5rem;
+  --blaetter-space-s: 0.75rem;
+  --blaetter-space-m: 1rem;
+  --blaetter-space-l: 1.25rem;
+  --blaetter-space-xl: 1.5rem;
+  --blaetter-space-2xl: 2rem;
+  --blaetter-space-3xl: 2.5rem;
+  --blaetter-space-block: 1.875rem;
+
   /* Breakpoints: media queries cannot read these, CSS writes the queries out; for scripts (matchMedia). */
   --blaetter-breakpoint-phone: 45rem;
   --blaetter-breakpoint-desktop: 75rem;
@@ -54,4 +64,13 @@
   --palm-color-grey: var(--blaetter-color-surface);
   --palm-color-success: var(--blaetter-color-success);
   --palm-color-warning: var(--blaetter-color-warning);
+  --palm-space-2xs: var(--blaetter-space-2xs);
+  --palm-space-xs: var(--blaetter-space-xs);
+  --palm-space-s: var(--blaetter-space-s);
+  --palm-space-m: var(--blaetter-space-m);
+  --palm-space-l: var(--blaetter-space-l);
+  --palm-space-xl: var(--blaetter-space-xl);
+  --palm-space-2xl: var(--blaetter-space-2xl);
+  --palm-space-3xl: var(--blaetter-space-3xl);
+  --palm-space-block-bottom: var(--blaetter-space-block);
 }

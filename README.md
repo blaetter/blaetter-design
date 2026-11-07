@@ -1,7 +1,7 @@
 # blaetter-design
 
 The design tokens of the »Blätter« layouts: colours (light and dark), the
-hues of the covers, the font stacks and the breakpoints. `tokens.json` is the only place
+hues of the covers, the font stacks, the spacing scale and the breakpoints. `tokens.json` is the only place
 where they are defined; everything else is generated from it or checked
 against it:
 
@@ -51,6 +51,30 @@ kind, with the broad rule at the left (`css/messages.css` in Palm).
 Contrast pairs on `surface` therefore stay in `tokens.json` even where the
 website shows the element on white. Moving the website onto white is a
 later, larger step.
+
+## Spacing
+
+Margins, paddings and gaps come from one scale of 4 px. It contains the
+steps of the website's legacy styles (blaetter-theme), so the website keeps
+its rhythm; their names keep the legacy names small, medium, large:
+
+| Name | Width | Legacy (blaetter-theme) | For |
+|---|---|---|---|
+| `2xs` | 4 px | – | between an icon and its text, small offsets |
+| `xs` | 8 px | – | filters and fields stacked in a narrow column, compact controls |
+| `s` | 12 px | `$smallGapPx` | padding of boxes and forms |
+| `m` | 16 px | `$mediumGapPx` | padding of framed teasers; archive page margin on phones |
+| `l` | 20 px | `$largeGapPx`, `$gridGutter` | grid gutter, teaser padding |
+| `xl` | 24 px | – | archive page margin, gaps between sections |
+| `2xl` | 32 px | – | large gaps between sections |
+| `3xl` | 40 px | `$pagePaddingPx` | page padding |
+| `block` | 30 px | `$blockBottomMarginPx` | gap below blocks and teasers (outside the scale) |
+
+New components use only these steps. Before the scale (11/2026) the three
+layouts used about 30 to 40 different values each (the archive mostly 6, 8,
+10, 12, 14 px; the website above all 20 px); odd values move onto the scale
+when their part is rebuilt. Values in `em` that grow with the font size
+(e.g. paragraph spacing) are not part of the scale.
 
 ## Breakpoints
 
@@ -106,6 +130,10 @@ end of a step, e.g. phones) or `min` (the lower end), a width in whole px,
 and `use`. A `max` step also yields `above-<name>` (its width + 0.001rem, as
 the website's legacy styles write it, so the two never overlap).
 
+**spacing**: one entry per step: `px` (whole px), `palm` (optional, name
+in the website theme, written as `--palm-space-<name>`), `use` and `note`.
+A step off the 4 px grid needs a `note` that says why it exists.
+
 **contrast.pairs**: foreground and background that must reach `min` (WCAG 2
 contrast ratio) in both themes; `cover.*` stands for all cover hues. The
 foreground counts as text unless `"as": "border"` is given (focus outlines,
@@ -115,17 +143,19 @@ borders of fields). The result of every pair is listed in
 ## Generated files
 
 - `dist/tokens.css`: light values as `--blaetter-color-*`,
-  `--blaetter-cover-*`, `--blaetter-font-*`, the breakpoints as
-  `--blaetter-breakpoint-*` (width) and `--blaetter-media-*` (media query),
-  plus the `--palm-color-*` names of the website theme pointing to them.
-- `dist/tokens.scss`: light values, font stacks and breakpoints as Sass
-  variables (`$blaetter-color-*`, `$blaetter-cover-*`, `$blaetter-font-*`,
-  `$blaetter-breakpoint-*`, `$blaetter-media-*` as strings) for the Sass
+  `--blaetter-cover-*`, `--blaetter-font-*`, the spacing as
+  `--blaetter-space-*`, the breakpoints as `--blaetter-breakpoint-*` (width)
+  and `--blaetter-media-*` (media query), plus the `--palm-color-*` and
+  `--palm-space-*` names of the website theme pointing to them.
+- `dist/tokens.scss`: light values, font stacks, spacing and breakpoints as
+  Sass variables (`$blaetter-color-*`, `$blaetter-cover-*`, `$blaetter-font-*`,
+  `$blaetter-space-*`, `$blaetter-breakpoint-*`, `$blaetter-media-*` as strings) for the Sass
   build of blaetter-theme.
 - `dist/tokens-dark.css`: dark values of the same properties. They apply
   when the system is dark and the page has no `data-theme="light"`, or
   when it has `data-theme="dark"`. Pages without a dark theme do not load it.
 - `dist/archive.json`: `colors` (light hex per role), `darkMap` (light hex
   → dark hex as text, background, border; `null` keeps the colour), `cover`
-  (light and dark hue) and `media` (media query per breakpoint).
+  (light and dark hue), `spacing` (px per step, the archive uses no custom
+  properties) and `media` (media query per breakpoint).
 - `dist/contrast.md`: every checked pair with its ratio.

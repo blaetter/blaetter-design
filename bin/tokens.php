@@ -7,13 +7,14 @@ declare(strict_types=1);
  * themes) and writes the files in dist/:
  *
  *   tokens.css       light values as custom properties (--blaetter-*), plus
- *                    the --palm-color-* names the website theme uses; the
- *                    breakpoints as values and media queries (for scripts)
+ *                    the --palm-color-* and --palm-space-* names the website
+ *                    theme uses; the spacing scale; the breakpoints as values
+ *                    and media queries (for scripts)
  *   tokens-dark.css  dark values of the same properties, for pages with a dark theme
- *   tokens.scss      light values and breakpoints as Sass variables ($blaetter-*),
+ *   tokens.scss      light values, spacing and breakpoints as Sass variables ($blaetter-*),
  *                    for the Sass build of the website's legacy styles (blaetter-theme)
- *   archive.json     plain hex values, the light → dark map and the media queries
- *                    of the offline archive
+ *   archive.json     plain hex values, the light → dark map, the spacing in px and
+ *                    the media queries of the offline archive
  *   contrast.md      every checked pair with its contrast, for review
  *
  * Usage: php bin/tokens.php build   write dist/
@@ -143,7 +144,40 @@ function model(array $tokens): array
         $breakpoints[$name] = breakpoint($name, $b);
     }
 
-    return ['colors' => $colors, 'fonts' => $fonts, 'pairs' => $pairs, 'breakpoints' => $breakpoints];
+    $spacing = [];
+    foreach ($tokens['spacing'] ?? [] as $name => $sp) {
+        if (str_starts_with($name, '$')) {
+            continue;
+        }
+        $spacing[$name] = spacing($name, $sp);
+    }
+
+    return ['colors' => $colors, 'fonts' => $fonts, 'pairs' => $pairs, 'breakpoints' => $breakpoints, 'spacing' => $spacing];
+}
+
+/**
+ * A step of the spacing scale in whole px. Steps off the 4 px grid need a note
+ * that says why they exist.
+ *
+ * @return array{px: int, palm: ?string, use: string, note: string}
+ */
+function spacing(string $name, array $sp): array
+{
+    if (!preg_match('/^[a-z0-9][a-z0-9-]*$/', $name)) {
+        throw new RuntimeException("spacing.$name: name in lower case letters, digits and hyphens");
+    }
+    $unknown = array_diff(array_keys($sp), ['px', 'palm', 'use', 'note']);
+    if ($unknown !== []) {
+        throw new RuntimeException("spacing.$name: unknown key " . implode(', ', $unknown));
+    }
+    if (!is_int($sp['px'] ?? null) || $sp['px'] <= 0) {
+        throw new RuntimeException("spacing.$name: \"px\" is a width in whole px");
+    }
+    if ($sp['px'] % 4 !== 0 && trim((string) ($sp['note'] ?? '')) === '') {
+        throw new RuntimeException("spacing.$name: {$sp['px']} px is off the 4 px scale, a \"note\" has to say why");
+    }
+
+    return ['px' => $sp['px'], 'palm' => $sp['palm'] ?? null, 'use' => (string) ($sp['use'] ?? ''), 'note' => (string) ($sp['note'] ?? '')];
 }
 
 /**
@@ -320,6 +354,10 @@ function tokensCss(array $model): string
         $lines[] = sprintf('  --blaetter-font-%s: %s;', $name, fontStack($f['stack']));
     }
     $lines[] = '';
+    foreach ($model['spacing'] as $name => $sp) {
+        $lines[] = sprintf('  --blaetter-space-%s: %s;', $name, rem($sp['px']));
+    }
+    $lines[] = '';
     $lines[] = '  /* Breakpoints: media queries cannot read these, CSS writes the queries out; for scripts (matchMedia). */';
     foreach ($model['breakpoints'] as $name => $b) {
         $lines[] = sprintf('  --blaetter-breakpoint-%s: %s;', $name, rem($b['px']));
@@ -332,6 +370,11 @@ function tokensCss(array $model): string
     foreach ($model['colors'] as $name => $c) {
         if ($c['palm'] !== null) {
             $lines[] = sprintf('  --palm-color-%s: var(%s);', $c['palm'], property($name));
+        }
+    }
+    foreach ($model['spacing'] as $name => $sp) {
+        if ($sp['palm'] !== null) {
+            $lines[] = sprintf('  --palm-space-%s: var(--blaetter-space-%s);', $sp['palm'], $name);
         }
     }
 
@@ -349,6 +392,10 @@ function tokensScss(array $model): string
         $lines[] = sprintf('$blaetter-font-%s: %s;', $name, fontStack($f['stack']));
     }
     $lines[] = '';
+    foreach ($model['spacing'] as $name => $sp) {
+        $lines[] = sprintf('$blaetter-space-%s: %s;', $name, rem($sp['px']));
+    }
+    $lines[] = '';
     foreach ($model['breakpoints'] as $name => $b) {
         $lines[] = sprintf('$blaetter-breakpoint-%s: %s;', $name, rem($b['px']));
     }
@@ -356,7 +403,7 @@ function tokensScss(array $model): string
         $lines[] = sprintf('$blaetter-media-%s: "%s";', $name, $query);
     }
 
-    return "// Generated from tokens.json (blaetter-design), do not edit. Light values and breakpoints as Sass variables.\n" . implode("\n", $lines) . "\n";
+    return "// Generated from tokens.json (blaetter-design), do not edit. Light values, spacing and breakpoints as Sass variables.\n" . implode("\n", $lines) . "\n";
 }
 
 /** @param list<string> $stack */
@@ -398,7 +445,7 @@ function archiveJson(array $model): string
         }
     }
 
-    return json_encode(['$comment' => 'Generated from tokens.json (blaetter-design), do not edit.', 'colors' => $colors, 'darkMap' => $map, 'cover' => $cover, 'media' => mediaQueries($model)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
+    return json_encode(['$comment' => 'Generated from tokens.json (blaetter-design), do not edit.', 'colors' => $colors, 'darkMap' => $map, 'cover' => $cover, 'spacing' => array_map(static fn (array $sp): int => $sp['px'], $model['spacing']), 'media' => mediaQueries($model)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
 }
 
 function contrastMd(array $model): string

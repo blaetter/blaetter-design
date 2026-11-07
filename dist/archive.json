@@ -97,6 +97,17 @@
             "dark": "#C69333"
         }
     },
+    "spacing": {
+        "2xs": 4,
+        "xs": 8,
+        "s": 12,
+        "m": 16,
+        "l": 20,
+        "xl": 24,
+        "2xl": 32,
+        "3xl": 40,
+        "block": 30
+    },
     "media": {
         "phone": "(max-width: 45rem)",
         "above-phone": "(min-width: 45.001rem)",
