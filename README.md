@@ -152,7 +152,8 @@ A step off the 4 px grid needs a `note` that says why it exists.
 **contrast.pairs**: foreground and background that must reach `min` (WCAG 2
 contrast ratio) in both themes; `cover.*` stands for all cover hues. The
 foreground counts as text unless `"as": "border"` is given (focus outlines,
-borders of fields). The result of every pair is listed in
+borders of fields). `use` says in a few words where the pair appears; it is the
+"Use" column of the contrast table in `dist/index.html`. The result of every pair is listed in
 `dist/contrast.md`; ratios are rounded down, so 4.49 never passes as 4.5.
 
 ## Generated files

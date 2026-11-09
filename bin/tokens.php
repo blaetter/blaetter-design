@@ -122,7 +122,7 @@ function model(array $tokens): array
         }
         foreach (expand((string) ($p['fg'] ?? ''), $colors) as $fg) {
             foreach (expand((string) ($p['bg'] ?? ''), $colors) as $bg) {
-                $pairs[] = ['fg' => $fg, 'bg' => $bg, 'min' => (float) ($p['min'] ?? 4.5), 'as' => $as];
+                $pairs[] = ['fg' => $fg, 'bg' => $bg, 'min' => (float) ($p['min'] ?? 4.5), 'as' => $as, 'use' => (string) ($p['use'] ?? '')];
             }
         }
         if (!isset($p['min'])) {
@@ -305,9 +305,9 @@ function ratio(string $a, string $b): float
 }
 
 /**
- * Every pair in both themes: [theme, fg name, fg hex, bg name, bg hex, ratio, min].
+ * Every pair in both themes: [theme, fg name, fg hex, bg name, bg hex, ratio, min, use].
  *
- * @return list<array{0: string, 1: string, 2: string, 3: string, 4: string, 5: float, 6: float}>
+ * @return list<array{0: string, 1: string, 2: string, 3: string, 4: string, 5: float, 6: float, 7: string}>
  */
 function contrastRows(array $model): array
 {
@@ -316,9 +316,11 @@ function contrastRows(array $model): array
         $fg = $model['colors'][$p['fg']];
         $bg = $model['colors'][$p['bg']];
         $label = $p['as'] === 'text' ? $p['fg'] : $p['fg'] . ' (' . $p['as'] . ')';
-        $rows[] = ['hell', $label, $fg['light'], $p['bg'], $bg['light'], ratio($fg['light'], $bg['light']), $p['min']];
+        // A pattern like cover.* stands for several hues: the use names the hue.
+        $use = str_starts_with($p['fg'], 'cover.') ? 'cover hue ' . substr($p['fg'], 6) . ': ' . $p['use'] : $p['use'];
+        $rows[] = ['hell', $label, $fg['light'], $p['bg'], $bg['light'], ratio($fg['light'], $bg['light']), $p['min'], $use];
         if ($fg['dark'] !== null && $bg['dark'] !== null) {
-            $rows[] = ['dunkel', $label, $fg['dark'][$p['as']], $p['bg'], $bg['dark']['background'], ratio($fg['dark'][$p['as']], $bg['dark']['background']), $p['min']];
+            $rows[] = ['dunkel', $label, $fg['dark'][$p['as']], $p['bg'], $bg['dark']['background'], ratio($fg['dark'][$p['as']], $bg['dark']['background']), $p['min'], $use];
         }
     }
 
@@ -584,28 +586,33 @@ function indexHtml(array $model): string
         $breakpoints .= sprintf("<tr><td><code>%s</code></td><td><code>%s</code></td><td>%s</td><td>%s</td></tr>\n", e($name), e($query), $px, e($use));
     }
 
-    // Contrast
+    // Accessibility: every pair in both themes, as one table row each
     $contrast = '';
     $failed = 0;
-    foreach (contrastRows($model) as [$theme, $fg, $fgHex, $bg, $bgHex, $ratio, $min]) {
+    // A hex value on its own colour, in black or white, whichever reads better.
+    $hexCell = static function (string $hex, string $name): string {
+        $ink = ratio($hex, '#000000') >= ratio($hex, '#FFFFFF') ? '#000000' : '#FFFFFF';
+
+        return sprintf('<span class="ds-hex" style="background:%s;color:%s" title="%s">%s</span>', $hex, $ink, e($name), $hex);
+    };
+    foreach (contrastRows($model) as [$theme, $fg, $fgHex, $bg, $bgHex, $ratio, $min, $use]) {
         $shown = floor($ratio * 100) / 100;
         $ok = $shown >= $min;
         $failed += $ok ? 0 : 1;
-        $sample = str_contains($fg, '(border)')
-            ? sprintf('<span class="ds-pair" style="background:%s"><span class="ds-frame" style="border-color:%s"></span></span>', $bgHex, $fgHex)
+        $isBorder = str_contains($fg, '(border)');
+        $sample = $isBorder || $min < 4.5 && str_starts_with($fg, 'cover.')
+            ? sprintf('<span class="ds-pair" style="background:%s"><span class="ds-frame" style="border-color:%s%s"></span></span>', $bgHex, $fgHex, $isBorder ? '' : ';background:' . $fgHex)
             : sprintf('<span class="ds-pair" style="background:%s;color:%s">Blätter Aa</span>', $bgHex, $fgHex);
         $contrast .= sprintf(
-            "<tr data-theme-row=\"%s\"><td>%s</td><td>%s</td><td>%s <span class=\"ds-muted\">%s</span></td><td>%s <span class=\"ds-muted\">%s</span></td><td class=\"ds-num\">%.2f:1</td><td class=\"ds-num\">%s:1</td><td>%s</td></tr>\n",
-            $theme === 'hell' ? 'light' : 'dark',
+            "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td class=\"ds-num\">%.2f:1 %s</td><td class=\"ds-num\">%s:1</td></tr>\n",
             $sample,
             $theme === 'hell' ? 'light' : 'dark',
-            e($fg),
-            $fgHex,
-            e($bg),
-            $bgHex,
+            e(ucfirst($use)),
+            $hexCell($fgHex, preg_replace('/ \(border\)$/', '', $fg)),
+            $hexCell($bgHex, $bg),
             $shown,
+            $ok ? '<span class="ds-ok" aria-label="passes">✓</span>' : '<strong class="ds-fail">✗ too low</strong>',
             rtrim(rtrim(sprintf('%.1f', $min), '0'), '.'),
-            $ok ? '<span class="ds-ok">ok</span>' : '<strong class="ds-fail">too low</strong>',
         );
     }
     $pairCount = count(contrastRows($model));
@@ -717,6 +724,7 @@ function indexHtml(array $model): string
   .ds-bar { display: inline-block; height: 16px; background: var(--blaetter-color-red); vertical-align: middle; }
   .ds-pair { display: inline-block; min-width: calc(7.5em + 22px); padding: 4px 10px; font-family: var(--blaetter-font-sans); font-size: 16px; border: 1px solid var(--blaetter-color-rule); white-space: nowrap; }
   .ds-frame { display: inline-block; width: calc(4.5em + 4px); height: calc(1.3em + 4px); border: 2px solid; vertical-align: middle; }
+  .ds-hex { display: inline-block; padding: 1px 6px; font-family: Menlo, Consolas, monospace; font-size: 13px; border: 1px solid var(--blaetter-color-rule); white-space: nowrap; }
   .ds-ok { color: var(--blaetter-color-muted); }
   .ds-fail { color: var(--blaetter-color-red); }
   .ds-grounds { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -893,7 +901,7 @@ $css
       <li class="active"><a aria-current="page" href="#uebersicht">Overview</a></li>
       <li><a href="#colours">Colours</a></li>
       <li><a href="#spacing">Spacing</a></li>
-      <li><a href="#contrast">Contrast</a></li>
+      <li><a href="#accessibility">Accessibility</a></li>
       <li><a href="#rules">Rules</a></li>
     </ul>
     </nav>
@@ -914,7 +922,7 @@ $css
   <li><a href="#type">4 Typography</a></li>
   <li><a href="#spacing">5 Spacing</a></li>
   <li><a href="#breakpoints">6 Breakpoints</a></li>
-  <li><a href="#contrast">7 Contrast</a></li>
+  <li><a href="#accessibility">7 Accessibility</a></li>
   <li><a href="#rules">8 Shared rules</a></li>
 </ul>
 </div>
@@ -964,12 +972,26 @@ $spacing  </table></div>
 $breakpoints  </table></div>
 </section>
 
-<section class="ds-section" id="contrast" aria-labelledby="contrast-h">
-  <h2 class="divider sticky-below-header" id="contrast-h">7 Contrast</h2>
-  <p class="ds-note">Every pair of <code>contrast.pairs</code> in both themes ($summary). WCAG 2: 4.5:1 for text, 3:1 for large text, focus outlines and borders of controls. Ratios are rounded down, so 4.49 never passes as 4.5. Each sample shows the pair in its own colours, whatever theme this page is in.</p>
-  <div class="ds-scroll"><table class="ds-table">
-    <tr><th>Sample</th><th>Theme</th><th>Foreground</th><th>Background</th><th class="ds-num">Ratio</th><th class="ds-num">Needs</th><th></th></tr>
-$contrast  </table></div>
+<section class="ds-section" id="accessibility" aria-labelledby="accessibility-h">
+  <h2 class="divider sticky-below-header" id="accessibility-h">7 Accessibility</h2>
+  <div class="ds-item">
+    <h3>Principles</h3>
+    <ul class="ds-note">
+      <li><strong>Standard:</strong> WCAG 2.2 level AA in every layout.</li>
+      <li><strong>Contrast:</strong> text at least 4.5:1 on its ground, focus outlines, borders of controls and graphics at least 3:1 (1.4.3, 1.4.11). A new pairing gets an entry in <code>contrast.pairs</code>; <code>./design check</code> fails when one is too low.</li>
+      <li><strong>Focus:</strong> always visible, a solid outline or ring in <code>focus</code>, no soft glow.</li>
+      <li><strong>Colour is never the only signal:</strong> a cover hue or a status colour always comes with a word, an icon or a shape (1.4.1).</li>
+    </ul>
+  </div>
+  <div class="ds-item">
+    <h3>Colour pairs and contrast</h3>
+    <p class="ds-note">Every pair of <code>contrast.pairs</code> in both themes ($summary): where it is used, foreground and background as colours (the name of the token in the tooltip), the contrast and what it needs. Each sample shows the pair in its own colours, whatever theme this page is in; frames stand for borders, filled squares for graphics. Ratios are rounded down, so 4.49 never passes as 4.5. Where a layout uses a pair is shown with its CSS selectors in the consumers' styleguides.</p>
+    <div class="ds-scroll"><table class="ds-table ds-contrast">
+      <thead><tr><th>Sample</th><th>Theme</th><th>Use</th><th>Foreground</th><th>Background</th><th class="ds-num">Contrast</th><th class="ds-num">Required</th></tr></thead>
+      <tbody>
+$contrast      </tbody>
+    </table></div>
+  </div>
 </section>
 
 <section class="ds-section" id="rules" aria-labelledby="rules-h">
@@ -986,10 +1008,8 @@ $contrast  </table></div>
     <h3>Rules for every layout</h3>
     <ul class="ds-note">
       <li>Colours, fonts, spacing and breakpoints come only from <code>tokens.json</code>; consumers keep verbatim copies and check them (see README). A new value starts here, never in a consumer.</li>
-      <li>Text reaches 4.5:1 on its ground, focus outlines and borders of controls 3:1; a new pairing gets an entry in <code>contrast.pairs</code>.</li>
       <li>Grey text is <code>muted</code>; <code>boundary</code> is for borders of controls only, never for text.</li>
-      <li>Focus is always visible: a solid outline or ring in <code>focus</code> (3:1 on its ground), no soft glow.</li>
-      <li>Colour is never the only signal: a cover hue or a status colour always comes with a word, an icon or a shape.</li>
+      <li>Contrast, focus and colour as a signal: see <a href="#accessibility">Accessibility</a>.</li>
       <li>Cover hues are for bars, dots and large figures, not for running text or links.</li>
       <li>Spacing uses the steps of the scale, media queries the three breakpoints; the website's legacy styles move onto them when their part is rebuilt.</li>
     </ul>
