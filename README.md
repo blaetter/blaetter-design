@@ -98,6 +98,20 @@ styles. The generated values (`--blaetter-media-*`, `$blaetter-media-*`,
 The website's legacy styles keep their finer steps (420, 560 and 1000 px)
 until the parts are replaced; new components use only these three.
 
+## Box model
+
+Every layout sets `box-sizing: border-box` for all elements:
+
+```css
+*, *:before, *:after { box-sizing: border-box; }
+```
+
+A width or height then includes padding and border, as the website has done
+for years (`html { box-sizing: border-box }` with `inherit` in its legacy
+styles) and as most current CSS bases do. Sizes in the layouts are meant
+that way: the content of the archive and the status page is 1100 px wide,
+so `.wrap` has `max-width: 1148px` with 24 px padding on either side.
+
 ## tokens.json
 
 **colors**: one entry per role (`page`, `text`, `link`, `muted`, …):

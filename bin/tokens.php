@@ -632,12 +632,14 @@ function indexHtml(array $model): string
 
   /* Base, as in archiv.css */
   html { -webkit-text-size-adjust: 100%; overflow-y: scroll; background: var(--blaetter-color-page); }
+  /* Widths and heights include padding and border, as in every Blätter layout (README, Box model) */
+  *, *:before, *:after { box-sizing: border-box; }
   body { margin: 0; background: var(--blaetter-color-page); color: var(--blaetter-color-text); font-family: var(--blaetter-font-serif); font-size: 18px; line-height: 1.6; }
   a { color: var(--blaetter-color-link); text-decoration: none; }
   a:hover, a:focus { text-decoration: underline; }
   a:focus, button:focus-visible { outline: 2px solid var(--blaetter-color-focus); outline-offset: 2px; }
   h1, h2, h3 { font-weight: 700; line-height: 1.2; }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  .wrap { max-width: 1148px; margin: 0 auto; padding: 0 24px; } /* 1100 px of content */
   .wrap:after { content: ""; display: table; clear: both; }
   .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); border: 0; white-space: nowrap; }
   .skip { position: absolute; left: -9999px; top: 0; background: var(--blaetter-color-page); padding: 8px 12px; }
@@ -671,7 +673,7 @@ function indexHtml(array $model): string
   }
   .header-measure .site-header, .header-measure .brand img, .header-measure .nav li, .header-measure .theme-toggle { transition: none; }
   .theme-toggle { float: right; width: 40px; height: 40px; margin: 0 -10px 0 12px; padding: 0; border: 0; background: transparent; cursor: pointer; }
-  .theme-icon { position: relative; display: block; width: 14px; height: 14px; margin: 0 auto; border: 2px solid var(--blaetter-color-muted); border-radius: 50%; overflow: hidden; }
+  .theme-icon { position: relative; display: block; width: 18px; height: 18px; margin: 0 auto; border: 2px solid var(--blaetter-color-muted); border-radius: 50%; overflow: hidden; }
   .theme-icon:before { content: ""; position: absolute; top: 0; right: 0; bottom: 0; border-left: 7px solid var(--blaetter-color-muted); }
   .theme-toggle:hover .theme-icon, .theme-toggle:focus .theme-icon, .theme-toggle:hover .theme-icon:before, .theme-toggle:focus .theme-icon:before { border-color: var(--blaetter-color-link); }
   .menu-toggle { display: none; }
@@ -701,20 +703,20 @@ function indexHtml(array $model): string
   .ds-item { margin-top: 36px; }
   .ds-item > h3 { margin: 0 0 6px; font-family: var(--blaetter-font-sans); font-size: 18px; }
   .ds-note { max-width: 46em; margin: 0 0 12px; font-family: var(--blaetter-font-sans); font-size: 15px; line-height: 1.55; }
-  ul.ds-note { padding-left: 1.3em; }
+  ul.ds-note { max-width: 47.3em; padding-left: 1.3em; } /* the list indent comes on top of the 46em measure */
   .ds-note code, .ds-table code { font-family: Menlo, Consolas, monospace; font-size: 0.88em; background: var(--blaetter-color-surface); padding: 1px 4px; }
   .ds-muted { color: var(--blaetter-color-muted); }
   .ds-swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 2%; margin: 0; padding: 0; list-style: none; font-family: var(--blaetter-font-sans); font-size: 14px; line-height: 1.45; }
-  .ds-swatch { display: block; height: 56px; margin-bottom: 6px; border: 1px solid var(--blaetter-color-rule); }
-  .ds-chip { display: inline-block; width: 0.9em; height: 0.9em; vertical-align: -0.1em; border: 1px solid var(--blaetter-color-rule); }
+  .ds-swatch { display: block; height: 58px; margin-bottom: 6px; border: 1px solid var(--blaetter-color-rule); }
+  .ds-chip { display: inline-block; width: calc(0.9em + 2px); height: calc(0.9em + 2px); vertical-align: -0.1em; border: 1px solid var(--blaetter-color-rule); }
   .ds-table { width: 100%; border-collapse: collapse; font-family: var(--blaetter-font-sans); font-size: 15px; }
   .ds-table th, .ds-table td { padding: 6px 10px 6px 0; border-bottom: 1px solid var(--blaetter-color-rule); text-align: left; vertical-align: top; }
   .ds-scroll { overflow-x: auto; }
   .ds-num { text-align: right !important; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .ds-sample { font-size: 18px; }
   .ds-bar { display: inline-block; height: 16px; background: var(--blaetter-color-red); vertical-align: middle; }
-  .ds-pair { display: inline-block; min-width: 7.5em; padding: 4px 10px; font-family: var(--blaetter-font-sans); font-size: 16px; border: 1px solid var(--blaetter-color-rule); white-space: nowrap; }
-  .ds-frame { display: inline-block; width: 4.5em; height: 1.3em; border: 2px solid; vertical-align: middle; }
+  .ds-pair { display: inline-block; min-width: calc(7.5em + 22px); padding: 4px 10px; font-family: var(--blaetter-font-sans); font-size: 16px; border: 1px solid var(--blaetter-color-rule); white-space: nowrap; }
+  .ds-frame { display: inline-block; width: calc(4.5em + 4px); height: calc(1.3em + 4px); border: 2px solid; vertical-align: middle; }
   .ds-ok { color: var(--blaetter-color-muted); }
   .ds-fail { color: var(--blaetter-color-red); }
   .ds-grounds { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
