@@ -20,6 +20,7 @@ this repository at run time.
 ```sh
 ./design build   # write dist/ from tokens.json
 ./design check   # exit 1 when dist/ is out of date or a contrast pair fails
+open dist/index.html   # overview of all tokens and contrasts
 ```
 
 ```sh
@@ -159,3 +160,14 @@ borders of fields). The result of every pair is listed in
   (light and dark hue), `spacing` (px per step, the archive uses no custom
   properties) and `media` (media query per breakpoint).
 - `dist/contrast.md`: every checked pair with its ratio.
+- `dist/index.html`: the overview for people, in the style of the archive's
+  design system: every colour (light, dark, covers) as a swatch with its
+  use, the font stacks with a sample, the spacing scale, the breakpoints,
+  every contrast pair as a live sample, and the rules all layouts share
+  (grounds, contrast, focus, colour never the only signal). Header (logo,
+  navigation, light/dark button, sticky header that gets smaller), headings
+  and page width follow the archive's `docs/design-system.html`. It uses
+  `tokens.css` and `tokens-dark.css` beside it and the web fonts and logo in
+  `assets/` (copies of the archive's `assets/fonts/` and `assets/img/`);
+  open it straight from the checkout. It shows tokens only: the elements
+  built from them live in the consumers' styleguides.
